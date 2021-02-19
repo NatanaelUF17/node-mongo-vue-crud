@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <title>Travelers</title>
+</head>
+<body>
+    <div id="app">
+        <div class="container mt-4">
+
+            <form @submit.prevent="addTraveler()">
+                <div class="form-group d-none">
+                    <input v-model="traveler.id">
+                </div>
+                <div class="form-group">
+                  <label for="Name">Name</label>
+                  <input v-model="traveler.name" type="text" class="form-control" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    <label for="Name">Last Name</label>
+                    <input v-model="traveler.lastName" type="text" class="form-control" placeholder="Last Name">
+                  </div>
+                <div class="form-group">
+                  <label for="Countru">Country</label>
+                  <input v-model="traveler.country" type="text" class="form-control" placeholder="Country">
+                </div>
+                <div class="form-group">
+                  <label for="exampleInputPassword1">Gender</label>
+                  <select v-model="traveler.gender" class="custom-select my-1 mr-sm-2">
+                    <option selected>Choose...</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select> 
+                </div>
+                
+                <div class="form-group">
+                    <label for="exampleInputPassword1">Age</label>
+                    <input v-model="traveler.age" type="number" class="form-control" placeholder="Age">
+                </div>
+
+                <button type="submit" class="btn btn-success">Save</button>
+                <button @click="updateTraveler(traveler.id)" type="button" class="btn btn-info">Update</button>
+            </form>
+            
+            <div class="mt-5">
+                <h1 class="text-center">Travelers API</h1>
+                <table class="table table-hover mt-4 text-center">
+                    <thead class="thead-dark">
+                      <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Last Name</th>
+                        <th scope="col">Country</th>
+                        <th scope="col">Gender</th>
+                        <th scope="col">Age</th>
+                        <th scope="col">Delete</th>
+                        <th scope="col">Info</th>
+                      </tr>
+                    </thead>
+                    <tbody v-for="item in travelers">
+                      <tr>
+                        <td>{{item.name}}</td>
+                        <td>{{item.lastName}}</td>
+                        <td>{{item.country}}</td>
+                        <td>{{item.gender}}</td>
+                        <td>{{item.age}}</td>
+                        <td><button @click="deleteTraveler(item._id)" type="button" class="btn btn-danger">Delete</button></td>
+                        <td><button @click="fillInputs(item._id)" type="button" class="btn btn-primary">Info</button>
+                     </tr>
+                    </tbody>
+                  </table>
+            </div>
+
+              <div class="mt-5">
+                <h1 class="text-center">Futbol API</h1>
+                <table class="table table-hover mt-4 text-center">
+                    <thead class="thead-dark">
+                      <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Position</th>
+                        <th scope="col">Nationality</th>
+                        <th scope="col">Team</th>
+                        <th scope="col">League</th>
+                      </tr>
+                    </thead>
+                    <tbody v-for="item of players">
+                      <tr>
+                        <td>{{item.player_name}}</td>
+                        <td>{{item.position}}</td>
+                        <td>{{item.nationality}}</td>
+                        <td>{{item.team}}</td>
+                        <td>{{item.league}}</td>
+                     </tr>
+                    </tbody>
+                  </table>
+              </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script>
+
+        const app = new Vue({
+            el: '#app',
+            data: {
+                travelers: null,
+                players: null,
+                traveler: {
+                    id: null,
+                    name: '',
+                    lastName: '',
+                    country: '',
+                    gender: '',
+                    age: 0
+                },
+            },
+            
+            mounted: async function() {
+                
+                await fetch('http://localhost:9917/api/v1/travelers/')
+                .then(res => res.json()) 
+                .then(data => {
+                    this.travelers = data;
+                });
+            },
+
+            methods: {       
+                clearInputs() {
+                    this.traveler.id = null,
+                    this.traveler.name = '',
+                    this.traveler.lastName = '',
+                    this.traveler.country = '',
+                    this.traveler.gender = '',
+                    this.traveler.age = 0
+                },
+
+                async addTraveler() {
+                    await fetch('http://localhost:9917/api/v1/travelers/',{
+                        method: "POST",
+                        headers: {
+                            'content-type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: this.traveler.name,
+                            lastName: this.traveler.lastName,
+                            country: this.traveler.country,
+                            gender: this.traveler.gender,
+                            age: this.traveler.age
+                        }),
+                    })
+                    .then(console.log('The traveler has been added'))
+                    .then(clearInputs());
+                },
+
+                async updateTraveler(id) {
+                    
+                    await fetch(`http://localhost:9917/api/v1/travelers/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            'content-type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            name: this.traveler.name,
+                            lastName: this.traveler.lastName,
+                            country: this.traveler.country,
+                            gender: this.traveler.gender,
+                            age: this.traveler.age
+                        }),  
+                    })
+                    .then(console.log('The traveler has been updated'))
+                    .then(clearInputs());
+                },
+
+                async fillInputs(id) {
+                    await fetch(`http://localhost:9917/api/v1/travelers/${id}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        this.traveler = data;
+                        this.traveler.id = data._id;
+                    });  
+                },
+
+                async deleteTraveler(id) {
+                    await fetch(`http://localhost:9917/api/v1/travelers/${id}`,{
+                        method: "DELETE",
+                        headers: {
+                            'content-type': 'application/json'
+                        },
+                    }).then(console.log('The traveler has been eliminated'));
+                },
+            }
+        });
+
+    </script>
+</body>
+</html>
